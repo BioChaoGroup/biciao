@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+
+import argparse
+import random
+import time
+
+def generate_random_sequence(data_type, length, seed=None):
+    bases = {
+        'dna': 'ATCG',
+        'rna': 'AUCG'
+    }
+    
+    if data_type not in bases:
+        raise ValueError(f"Unsupported data type: {data_type}. Supported types are 'dna' and 'rna'.")
+
+    if seed is not None:
+        random.seed(seed)
+
+    return ''.join(random.choices(bases[data_type], k=length))
+
+def format_fasta(header, sequence, line_length=60):
+    formatted_sequence = '\n'.join(sequence[i:i+line_length] for i in range(0, len(sequence), line_length))
+    return f"1>{header}\n{formatted_sequence}"
+
+def format_fastq(header, sequence, line_length=60):
+    quality_scores = ''.join(chr(random.randint(53, 73)) for _ in sequence)
+    formatted_sequence = '\n'.join(sequence[i:i+line_length] for i in range(0, len(sequence), line_length))
+    formatted_quality = '\n'.join(quality_scores[i:i+line_length] for i in range(0, len(quality_scores), line_length))
+    return f"@{header}\n{formatted_sequence}\n+\n{formatted_quality}"
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Generate a random sequence.')
+    parser.add_argument('data_type', type=str, help="Type of sequence to generate (e.g., 'dna' or 'rna')")
+    parser.add_argument('length', type=int, help='Length of the sequence to generate')
+    parser.add_argument('-s', '--seed', type=int, help='Random seed for reproducibility', default=None)
+    parser.add_argument('-o', '--output', type=str, help='Output file to save the sequence', default=None)
+
+    args = parser.parse_args()
+
+    if args.seed is None:
+        seed = int(time.time() * 1000) % (2**32 - 1)
+    random.seed(seed)
+
+    try:
+        random_sequence = generate_random_sequence(args.data_type, args.length, seed)
+    except ValueError as e:
+        print(e)
+        parser.print_help()
+        return
+
+    header = f"RAND_{args.data_type.upper()}_{seed}_{args.length}"
+    output = format_fasta(header, random_sequence)
+
+    if args.output:
+        with open(args.output, 'w') as file:
+            file.write(output + '\n')
+    else:
+        print(output)
+
+if __name__ == '__main__':
+    main()

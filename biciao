@@ -1,10 +1,10 @@
 #!/usr/bin/env perl
-# (c) 2016 - 2021 CHAO
+# (c) 2019 - 2024 CHAO
 # ===================================================================
-my $Description  =  "Metagenome Beads Barcode Quantifictaion launcher";
+my $Description  =  "BioInformatics toolkit - Ciao";
 # Author:            Chao | fangchao@genomics.cn
 my $version      =  0.1;
-# Last modified:    09 Mar 2021 (since 13 Jan 2019)
+# since 13 Jan 2019
 # ===================================================================
 # see detail below
 use warnings;
@@ -64,7 +64,9 @@ if($pattern eq "smk"){
 #################################
 ###  sub func calling module  ###
 if ($pattern eq "cmd"){
-	print "Available sub commands:\n";
+	print "Available bin commands:\n";
+	system("ls --color $Bin/bin");
+	print "Available src commands:\n";
 	system("ls --color $Bin/src");
 	print "Available util commands:\n";
 	system("ls --color $Bin/util");
@@ -74,7 +76,8 @@ if ($pattern !~ /^(init|cfg|smk|-v|-h)$/){
   shift @ARGV;
   $pattern =~ s/(!)$//;
   my $warn = ($1)?1:0;
-  my $path = ( -e "$Bin/src/$pattern")?"$Bin/src":
+  my $path = ( -e "$Bin/bin/$pattern")?"$Bin/bin":
+             ( -e "$Bin/src/$pattern")?"$Bin/src":
              ( -e "$Bin/util/$pattern")?"$Bin/util":'';
   die "[cmd] Can not find sub func '$pattern'. Please check it again.\n" unless $path;
   my $int = ($pattern=~/\.pl$/)?'perl ':
